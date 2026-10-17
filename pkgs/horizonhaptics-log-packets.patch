@@ -1,0 +1,34 @@
+--- a/worker.py
++++ b/worker.py
+@@ -88,6 +88,7 @@
+ 
+         log.info("Listening on %s:%d - waiting for FH6 packets", UDP_HOST, self._port)
+         last_pkt = time.monotonic()
++        receiving_logged = size_warned = False
+ 
+         try:
+             while self._state.running:
+@@ -102,6 +103,9 @@
+                     data, addr = sock.recvfrom(512)
+                 except socket.timeout:
+                     if time.monotonic() - last_pkt > 2.0:
++                        if receiving_logged:
++                            log.info("UDP packets stopped")
++                            receiving_logged = False
+                         with self._state.lock:
+                             self._state.receiving = False
+                     if prev != OFF_PAIR:
+@@ -110,7 +114,13 @@
+                         prev = OFF_PAIR
+                     continue
+ 
++                if not receiving_logged:
++                    receiving_logged = True
++                    log.info("Receiving UDP from %s:%d (%d-byte packets)", addr[0], addr[1], len(data))
+                 if len(data) != FH6_PACKET_SIZE:
++                    if not size_warned:
++                        size_warned = True
++                        log.warning("Ignoring %d-byte packets: expected %d (FH6 Data Out format)", len(data), FH6_PACKET_SIZE)
+                     continue
+ 
+                 last_pkt = time.monotonic()

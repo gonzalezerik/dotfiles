@@ -1,0 +1,84 @@
+From cdb135df0815abed70d160890c8977f546c9124d Mon Sep 17 00:00:00 2001
+From: Robin Everaars
+Date: Sun, 27 Sep 2026 18:52:39 -0700
+Subject: [PATCH 1/2] platform/x86: asus-wmi: keep the lid-flip state when
+ UNKNOWN is set
+
+On some convertibles the lid-flip devstate sets ASUS_WMI_DSTS_UNKNOWN_BIT
+alongside the state bit while the machine is folded. Measured on an ASUS
+ProArt PX13 (HN7306EAC), ASUS_WMI_DEVID_LID_FLIP_ROG answers 0x00010000
+open and 0x00010003 folded, that is presence | status | UNKNOWN.
+
+asus_wmi_get_devstate_simple() treats that bit as "the state is not known"
+and fails the call with -ENODEV, so asus_wmi_tablet_mode_get_state()
+discards a perfectly good state sitting in bit 0 and SW_TABLET_MODE never
+moves.
+
+Add asus_wmi_tablet_sw_get_state(), which gates on the presence bit only
+and returns the status bit. Use it from the two tablet-switch paths. Every
+other caller of asus_wmi_get_devstate_simple() is untouched, so the change
+is confined to the tablet switch.
+
+Signed-off-by: Robin Everaars
+---
+ drivers/platform/x86/asus-wmi.c | 32 ++++++++++++++++++++++++++++++--
+ 1 file changed, 30 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/platform/x86/asus-wmi.c b/drivers/platform/x86/asus-wmi.c
+index a650904..5e7fcba 100644
+--- a/drivers/platform/x86/asus-wmi.c
++++ b/drivers/platform/x86/asus-wmi.c
+@@ -706,12 +706,40 @@ static void asus_wmi_tablet_sw_report(struct asus_wmi *asus, bool value)
+ 	input_sync(asus->inputdev);
+ }
+ 
++/*
++ * Read the lid-flip state directly rather than through
++ * asus_wmi_get_devstate_simple().
++ *
++ * On some convertibles the lid-flip devstate sets ASUS_WMI_DSTS_UNKNOWN_BIT
++ * alongside the state bit while folded. Measured on an ASUS ProArt PX13
++ * (HN7306EAC), devid ASUS_WMI_DEVID_LID_FLIP_ROG answers 0x00010000 open and
++ * 0x00010003 folded, i.e. presence | state | UNKNOWN. The generic helper reads
++ * that bit as "the state is not known" and rejects the whole call with -ENODEV,
++ * so asus_wmi_tablet_mode_get_state() discards a perfectly good state sitting in
++ * bit 0 and the switch never moves. Only presence gates the value here, which is
++ * safe because this path serves the tablet switch alone.
++ */
++static int asus_wmi_tablet_sw_get_state(struct asus_wmi *asus, u32 dev_id)
++{
++	u32 retval;
++	int err;
++
++	err = asus_wmi_get_devstate(asus, dev_id, &retval);
++	if (err < 0)
++		return err;
++
++	if (!(retval & ASUS_WMI_DSTS_PRESENCE_BIT))
++		return -ENODEV;
++
++	return !!(retval & ASUS_WMI_DSTS_STATUS_BIT);
++}
++
+ static void asus_wmi_tablet_sw_init(struct asus_wmi *asus, u32 dev_id, int event_code)
+ {
+ 	struct device *dev = &asus->platform_device->dev;
+ 	int result;
+ 
+-	result = asus_wmi_get_devstate_simple(asus, dev_id);
++	result = asus_wmi_tablet_sw_get_state(asus, dev_id);
+ 	if (result >= 0) {
+ 		input_set_capability(asus->inputdev, EV_SW, SW_TABLET_MODE);
+ 		asus_wmi_tablet_sw_report(asus, result);
+@@ -786,7 +814,7 @@ static void asus_wmi_tablet_mode_get_state(struct asus_wmi *asus)
+ 	if (!asus->tablet_switch_dev_id)
+ 		return;
+ 
+-	result = asus_wmi_get_devstate_simple(asus, asus->tablet_switch_dev_id);
++	result = asus_wmi_tablet_sw_get_state(asus, asus->tablet_switch_dev_id);
+ 	if (result >= 0)
+ 		asus_wmi_tablet_sw_report(asus, result);
+ }
+-- 
+2.55.0
+

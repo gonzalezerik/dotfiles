@@ -1,0 +1,319 @@
+# ── Starship prompt ────────────────────────────────────────────────────────
+# Colours come from the host palette (terminal.nix sets `palette` and its
+# table), the same one as Noctalia, foot and nvim. Glyphs are Nerd Font v3
+# codepoints (JetBrainsMono Nerd Font), written as \u escapes so they survive
+# editors without the font.
+#
+# Layout:  ╭─( os │ ssh user@host ) ( dir ) ( forge  branch  status ) ( langs / nix / nvim ) ›
+#          │
+#          ╰─❯                                  right: exit · jobs · duration · battery · time
+
+"$schema" = "https://starship.rs/config-schema.json"
+
+add_newline = true
+command_timeout = 800
+
+format = """
+[╭─](fg:secondary)\
+[](fg:primary)\
+$os\
+$username\
+$hostname\
+[](fg:primary bg:secondary)\
+$directory\
+[](fg:secondary bg:float)\
+([ ](fg:hover bg:float)\
+${custom.forge}\
+$git_branch\
+$git_commit\
+$git_state\
+$git_status\
+$git_metrics\
+[](fg:hover bg:float))\
+${custom.nvim}\
+$nix_shell\
+$direnv\
+$python\
+$rust\
+$c\
+$cpp\
+$golang\
+$nodejs\
+$bun\
+$lua\
+$dotnet\
+$cmake\
+$docker_context\
+$kubernetes\
+$package\
+[](fg:float)\
+$line_break\
+[│](fg:secondary)\
+$line_break\
+[╰─](fg:secondary)\
+$character"""
+
+right_format = """
+$status\
+$sudo\
+$jobs\
+$cmd_duration\
+$battery\
+$time"""
+
+# [palettes.<slug>] is generated from the host theme (terminal.nix).
+
+# ── Segment 1: OS / identity ────────────────────────────────────────────────
+[os]
+disabled = false
+style = "bg:primary fg:on_primary"
+format = "[$symbol]($style)"
+
+[os.symbols]
+NixOS = " "
+Linux = " "
+
+# user@host only appear over SSH (e.g. into another machine).
+[username]
+show_always = false
+style_user = "bg:primary fg:on_primary bold"
+style_root = "bg:primary fg:red bold"
+format = "[$user]($style)"
+
+[hostname]
+ssh_only = true
+ssh_symbol = " "
+style = "bg:primary fg:on_primary"
+format = "[@$hostname $ssh_symbol]($style)"
+
+# ── Segment 2: directory ────────────────────────────────────────────────────
+[directory]
+style = "bg:secondary fg:fg_bright bold"
+read_only_style = "bg:secondary fg:red"
+repo_root_style = "bg:secondary fg:fg_bright bold underline"
+format = "[ $path ]($style)[$read_only]($read_only_style)"
+repo_root_format = "[ $before_root_path]($before_repo_root_style)[$repo_root]($repo_root_style)[$path ]($style)[$read_only]($read_only_style)"
+before_repo_root_style = "bg:secondary fg:fg"
+truncation_length = 4
+truncation_symbol = "…/"
+truncate_to_repo = false
+read_only = " "
+home_symbol = "~"
+
+[directory.substitutions]
+"Projects" = " Projects"
+"Downloads" = " Downloads"
+"Notes" = " Notes"
+
+# ── Segment 3: git / forge ──────────────────────────────────────────────────
+# Forge icon picked from the origin remote: GitHub, GitLab, else a generic git
+# mark (covers the homelab Forgejo).
+[custom.forge]
+require_repo = true
+when = "git remote get-url origin"
+command = '''
+case "$(git remote get-url origin 2>/dev/null)" in
+  *github.com*) printf '' ;;
+  *gitlab*)     printf '' ;;
+  *)            printf '' ;;
+esac
+'''
+shell = ["bash", "--noprofile", "--norc"]
+style = "bg:hover fg:primary"
+format = "[ $output]($style)"
+
+[git_branch]
+symbol = ""
+style = "bg:hover fg:primary bold"
+format = "[ $symbol $branch(:$remote_branch)]($style)"
+truncation_length = 32
+
+[git_commit]
+tag_disabled = false
+tag_symbol = "  "
+style = "bg:hover fg:tertiary"
+format = "[  $hash$tag]($style)"
+
+[git_state]
+style = "bg:hover fg:yellow bold"
+format = "[ $state( $progress_current/$progress_total)]($style)"
+
+[git_status]
+style = "bg:hover fg:yellow"
+format = "([ $all_status$ahead_behind]($style))"
+conflicted = "[=$count ](bg:hover fg:red bold)"
+ahead = "[⇡$count ](bg:hover fg:green)"
+behind = "[⇣$count ](bg:hover fg:red)"
+diverged = "[⇡$ahead_count⇣$behind_count ](bg:hover fg:magenta)"
+up_to_date = ""
+untracked = "[?$count ](bg:hover fg:fg_dim)"
+stashed = "[ $count ](bg:hover fg:tertiary)"
+modified = "[!$count ](bg:hover fg:yellow)"
+staged = "[+$count ](bg:hover fg:green)"
+renamed = "[»$count ](bg:hover fg:primary)"
+deleted = "[✘$count ](bg:hover fg:red)"
+typechanged = ""
+
+[git_metrics]
+disabled = false
+added_style = "bg:hover fg:green"
+deleted_style = "bg:hover fg:red"
+format = "([+$added ]($added_style))([-$deleted ]($deleted_style))"
+
+# ── Segment 4: environment / languages ──────────────────────────────────────
+# Shown when you're inside an nvim :terminal ($NVIM is set there), so a
+# nested shell never gets mistaken for a top-level one.
+[custom.nvim]
+when = 'test -n "$NVIM"'
+shell = ["bash", "--noprofile", "--norc"]
+symbol = ""
+style = "bg:float fg:green bold"
+format = "[ $symbol nvim ]($style)"
+
+[nix_shell]
+symbol = ""
+style = "bg:float fg:primary bold"
+impure_msg = ""
+pure_msg = "pure "
+format = "[ $symbol $state$name ]($style)"
+heuristic = true
+
+[direnv]
+disabled = false
+symbol = ""
+style = "bg:float fg:tertiary"
+format = "[ $symbol $loaded ]($style)"
+loaded_msg = "✓"
+unloaded_msg = "✗"
+allowed_msg = ""
+not_allowed_msg = "blocked"
+denied_msg = "denied"
+
+[python]
+symbol = ""
+style = "bg:float fg:yellow"
+format = '[ $symbol( $version)( \($virtualenv\)) ]($style)'
+
+[rust]
+symbol = ""
+style = "bg:float fg:red"
+format = "[ $symbol( $version) ]($style)"
+
+[c]
+symbol = ""
+style = "bg:float fg:primary"
+format = "[ $symbol( $version) ]($style)"
+
+[cpp]
+disabled = false
+symbol = ""
+style = "bg:float fg:primary"
+format = "[ $symbol( $version) ]($style)"
+
+[golang]
+symbol = ""
+style = "bg:float fg:primary"
+format = "[ $symbol( $version) ]($style)"
+
+[nodejs]
+symbol = ""
+style = "bg:float fg:green"
+format = "[ $symbol( $version) ]($style)"
+
+[bun]
+symbol = ""
+style = "bg:float fg:fg"
+format = "[ $symbol( $version) ]($style)"
+
+[lua]
+symbol = ""
+style = "bg:float fg:tertiary"
+format = "[ $symbol( $version) ]($style)"
+
+[dotnet]
+symbol = ""
+style = "bg:float fg:magenta"
+format = "[ $symbol( $version)(  $tfm) ]($style)"
+
+[cmake]
+style = "bg:float fg:fg_dim"
+format = "[ $symbol( $version) ]($style)"
+
+[docker_context]
+symbol = ""
+style = "bg:float fg:primary"
+format = "[ $symbol $context ]($style)"
+
+[kubernetes]
+disabled = false
+symbol = "\U000F10FE"
+style = "bg:float fg:primary"
+format = "[ $symbol $context( \\($namespace\\)) ]($style)"
+# Only in dirs that are actually k8s-ish, not everywhere kubeconfig exists.
+detect_folders = ["k8s", "kubernetes", "manifests", "charts"]
+detect_files = ["kustomization.yaml", "Chart.yaml", "skaffold.yaml"]
+
+[package]
+symbol = ""
+style = "bg:float fg:fg_dim"
+format = "[ $symbol $version ]($style)"
+
+# ── Line 2 ──────────────────────────────────────────────────────────────────
+[character]
+success_symbol = "[❯](bold primary)"
+error_symbol = "[❯](bold red)"
+vimcmd_symbol = "[❮](bold green)"
+
+# ── Right prompt ────────────────────────────────────────────────────────────
+[status]
+disabled = false
+symbol = ""
+not_executable_symbol = ""
+not_found_symbol = ""
+sigint_symbol = ""
+signal_symbol = "⚡"
+map_symbol = true
+pipestatus = true
+style = "fg:red"
+format = "[$symbol $common_meaning$signal_name$maybe_int]($style) "
+
+[sudo]
+disabled = false
+symbol = ""
+style = "fg:yellow"
+format = "[$symbol]($style) "
+
+[jobs]
+symbol = ""
+style = "fg:tertiary"
+format = "[$symbol $number]($style) "
+
+# Long commands also fire a desktop notification (Noctalia picks it up).
+[cmd_duration]
+min_time = 2_000
+show_milliseconds = false
+show_notifications = true
+min_time_to_notify = 45_000
+style = "fg:yellow"
+format = "[ $duration]($style) "
+
+[battery]
+full_symbol = " "
+charging_symbol = " "
+discharging_symbol = " "
+empty_symbol = " "
+format = "[$symbol$percentage]($style) "
+
+[[battery.display]]
+threshold = 15
+style = "bold fg:red"
+
+[[battery.display]]
+threshold = 30
+style = "fg:yellow"
+
+[time]
+disabled = false
+time_format = "%H:%M"
+style = "fg:muted"
+format = "[ $time]($style)"

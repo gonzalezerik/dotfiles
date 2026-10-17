@@ -1,0 +1,72 @@
+From 51dd5955d26cedd3dd58b396e5122d48fffe52b0 Mon Sep 17 00:00:00 2001
+From: Robin Everaars
+Date: Sun, 27 Sep 2026 18:52:52 -0700
+Subject: [PATCH 2/2] platform/x86: asus-wmi: accept either lid-flip notify
+ code
+
+asus-wmi pairs the devid it polls for the tablet switch with the single
+notify code it listens for, and tablet_mode_sw only offers those fixed
+pairings. Some convertibles read the hinge at one lid-flip devid but
+notify with the other, which no value covers.
+
+The ASUS ProArt PX13 (HN7306EAC) is one. ASUS_WMI_DEVID_LID_FLIP is frozen
+at 1 in every pose while ASUS_WMI_DEVID_LID_FLIP_ROG tracks the hinge, yet
+folding notifies with NOTIFY_LID_FLIP rather than NOTIFY_LID_FLIP_ROG. So
+tablet_mode_sw=2 pins the switch on and suspends the internal keyboard for
+good, and tablet_mode_sw=3 reads the right devid but never hears the event.
+
+Accept either lid-flip code once a lid-flip switch is registered. Both are
+the same "lid flip action" event and both already map to KEY_PROG2 in the
+sparse keymap. Machines with a keyboard-dock switch notify with 0x75 and
+are unaffected, and with no switch registered the event code is 0 and the
+old equality test still runs.
+
+Signed-off-by: Robin Everaars
+---
+ drivers/platform/x86/asus-wmi.c | 23 ++++++++++++++++++++++-
+ 1 file changed, 22 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/platform/x86/asus-wmi.c b/drivers/platform/x86/asus-wmi.c
+index 5e7fcba..3d51ed3 100644
+--- a/drivers/platform/x86/asus-wmi.c
++++ b/drivers/platform/x86/asus-wmi.c
+@@ -819,6 +819,27 @@ static void asus_wmi_tablet_mode_get_state(struct asus_wmi *asus)
+ 		asus_wmi_tablet_sw_report(asus, result);
+ }
+ 
++/*
++ * Some convertibles report the hinge at one lid-flip devid while their firmware
++ * notifies with the other lid-flip code, a pairing no tablet_mode_sw value
++ * covers. The ASUS ProArt PX13 (HN7306EAC) is one: ASUS_WMI_DEVID_LID_FLIP is
++ * frozen at 1 in every pose while ASUS_WMI_DEVID_LID_FLIP_ROG tracks the hinge,
++ * yet the fold notifies with NOTIFY_LID_FLIP rather than NOTIFY_LID_FLIP_ROG.
++ * Accept either code once a lid-flip switch is registered; both are the same
++ * "lid flip action" event and both already map to KEY_PROG2 in the sparse keymap.
++ */
++static bool asus_wmi_is_tablet_switch_code(struct asus_wmi *asus, int code)
++{
++	if (code == asus->tablet_switch_event_code)
++		return true;
++
++	if (asus->tablet_switch_event_code == NOTIFY_LID_FLIP ||
++	    asus->tablet_switch_event_code == NOTIFY_LID_FLIP_ROG)
++		return code == NOTIFY_LID_FLIP || code == NOTIFY_LID_FLIP_ROG;
++
++	return false;
++}
++
+ /* Charging mode, 1=Barrel, 2=USB ******************************************/
+ #if IS_ENABLED(CONFIG_ASUS_WMI_DEPRECATED_ATTRS)
+ static ssize_t charge_mode_show(struct device *dev,
+@@ -4694,7 +4715,7 @@ static void asus_wmi_handle_event_code(int code, struct asus_wmi *asus)
+ 		return;
+ 	}
+ 
+-	if (code == asus->tablet_switch_event_code) {
++	if (asus_wmi_is_tablet_switch_code(asus, code)) {
+ 		asus_wmi_tablet_mode_get_state(asus);
+ 		return;
+ 	}
+-- 
+2.55.0
+

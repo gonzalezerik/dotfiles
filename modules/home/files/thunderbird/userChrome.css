@@ -1,0 +1,158 @@
+/* px13-blue glass: foot's #0A0D10 at alpha 0.80, niri blurs behind it. */
+@namespace html url("http://www.w3.org/1999/xhtml");
+
+* {
+  color-scheme: dark !important;
+  --px-bg: rgba(10, 13, 16, 0.80);
+  --px-fg: #C9D6DE;
+  --px-fg-bright: #E8EEF2;
+  --px-fg-dim: #9DB0BD;
+  --px-muted: #6C7F8C;
+  --px-primary: #87ABC0;
+  --px-blue: #3F5875;
+  --px-tint-1: rgba(201, 214, 222, 0.04);
+  --px-tint-2: rgba(201, 214, 222, 0.07);
+  --px-tint-3: rgba(201, 214, 222, 0.11);
+  --px-line: rgba(201, 214, 222, 0.09);
+  --px-sel: rgba(63, 88, 117, 0.75);
+  --px-sel-soft: rgba(135, 171, 192, 0.14);
+
+  --layout-background-0: transparent !important;
+  --layout-background-1: transparent !important;
+  --layout-background-2: var(--px-tint-1) !important;
+  --layout-background-3: var(--px-tint-2) !important;
+  --layout-background-4: var(--px-tint-3) !important;
+  --layout-color-0: var(--px-fg-bright) !important;
+  --layout-color-1: var(--px-fg) !important;
+  --layout-color-2: var(--px-fg-dim) !important;
+  --layout-color-3: var(--px-muted) !important;
+  --layout-border-0: var(--px-line) !important;
+  --layout-border-1: var(--px-line) !important;
+  --layout-border-2: var(--px-tint-3) !important;
+
+  --color-surface-base: transparent !important;
+  --color-surface-subtle: var(--px-tint-1) !important;
+  --color-surface-lower: transparent !important;
+  --color-surface-raised: var(--px-tint-2) !important;
+  --color-surface-deep: var(--px-tint-3) !important;
+  --color-surface-border: var(--px-line) !important;
+  --color-surface-border-intense: var(--px-tint-3) !important;
+  --color-primary-soft: var(--px-sel-soft) !important;
+  --color-primary-default: var(--px-primary) !important;
+  --color-primary-hover: #A9CBDD !important;
+  --color-primary-pressed: #6C93A6 !important;
+  --color-text-base: var(--px-fg) !important;
+  --color-text-secondary: var(--px-fg-dim) !important;
+  --color-text-muted: var(--px-muted) !important;
+  --color-text-brand: var(--px-primary) !important;
+  --color-text-highlight: var(--px-primary) !important;
+
+  --selected-item-color: var(--px-sel) !important;
+  --selected-item-text-color: var(--px-fg-bright) !important;
+  --sidebar-background: transparent !important;
+  --sidebar-background-color: transparent !important;
+  --sidebar-highlight-background-color: var(--px-sel) !important;
+  --sidebar-highlight-text-color: var(--px-fg-bright) !important;
+  --tree-view-bg: transparent !important;
+  --tree-view-color: var(--px-fg) !important;
+  --tree-pane-background: transparent !important;
+  --tree-view-header-hover-bg: var(--px-tint-2) !important;
+  --tree-view-header-hover-active-bg: var(--px-tint-3) !important;
+  --tree-card-background-current: var(--px-tint-1) !important;
+  --tree-card-background-current-unfocused: var(--px-tint-1) !important;
+  --tree-card-background-selected: var(--px-sel-soft) !important;
+  --tree-card-background-selected-unfocused: var(--px-sel-soft) !important;
+  --tree-card-background-selected-current: var(--px-sel) !important;
+  --tree-card-background-selected-current-unfocused: var(--px-sel-soft) !important;
+  --tree-card-background-selected-current-unfocused-hover: var(--px-tint-3) !important;
+  --thread-line-color: var(--px-line) !important;
+  --new-color: var(--px-primary) !important;
+  --new-subject-color: var(--px-primary) !important;
+  --unread-color: var(--px-fg-bright) !important;
+  --new-folder-color: var(--px-primary) !important;
+
+  /* The built-in Dark theme is an lwtheme: its accent/toolbar colors are
+     what paint the toolbox, status bar and findbar opaque. */
+  --lwt-accent-color: transparent !important;
+  --lwt-header-image: none !important;
+  --lwt-additional-images: none !important;
+  --toolbar-background-color: transparent !important;
+  --chrome-content-separator-color: var(--px-line) !important;
+  --sidebar-border: var(--px-line) !important;
+  --search-bar-border-color: var(--px-line) !important;
+  --toolbar-field-border-color: var(--px-line) !important;
+  --toolbar-field-background-color-focus: var(--px-tint-3) !important;
+  --search-bar-focus-background: var(--px-tint-3) !important;
+  --button-border-radius: 8px !important;
+
+  /* Folder icons: px13-blue instead of Thunderbird's rainbow. */
+  --folder-color-inbox: var(--px-primary) !important;
+  --folder-color-draft: var(--px-fg-dim) !important;
+  --folder-color-sent: var(--px-fg-dim) !important;
+  --folder-color-archive: var(--px-fg-dim) !important;
+  --folder-color-spam: #C1666B !important;
+  --folder-color-trash: var(--px-fg-dim) !important;
+  --folder-color-template: var(--px-fg-dim) !important;
+  --folder-color-newsletter: var(--px-fg-dim) !important;
+  --folder-color-rss: var(--px-fg-dim) !important;
+  --folder-color-outbox: var(--px-fg-dim) !important;
+  --folder-color-folder: #6C93A6 !important;
+
+  --spaces-bg-color: transparent !important;
+  --spaces-bg-image: none !important;
+  --spaces-button-active-bg-color: var(--px-sel) !important;
+  --spaces-button-active-text-color: var(--px-fg-bright) !important;
+  --tabs-toolbar-background-color: transparent !important;
+  --toolbar-bgcolor: transparent !important;
+  --toolbar-field-background-color: var(--px-tint-2) !important;
+  --search-bar-background: var(--px-tint-2) !important;
+  --input-background-color: var(--px-tint-2) !important;
+  --button-background-color: var(--px-tint-2) !important;
+  --button-primary-background-color: var(--px-blue) !important;
+  --focus-outline-color: var(--px-primary) !important;
+
+  /* Menus/popups are separate surfaces niri doesn't blur: keep them solid. */
+  --arrowpanel-background: #10161B !important;
+  --arrowpanel-color: var(--px-fg) !important;
+  --arrowpanel-border-color: var(--px-line) !important;
+  --panel-background: #10161B !important;
+  --menu-background-color: #10161B !important;
+  --menu-color: var(--px-fg) !important;
+}
+
+/* The glass itself: only on top-level windows, nested docs stay clear. */
+:root {
+  background: var(--px-bg) !important;
+  color: var(--px-fg) !important;
+}
+@-moz-document url("about:3pane"), url("about:message"), url("about:addressbook"),
+  url("about:preferences"), url("about:accountsettings"),
+  url-prefix("chrome://messenger/content/am-"),
+  url-prefix("chrome://messenger/content/AccountManager"),
+  url-prefix("chrome://messenger/content/preferences/"),
+  url-prefix("chrome://messenger/content/addressbook/") {
+  :root, html|body { background: transparent !important; }
+}
+
+browser, iframe, #tabpanelcontainer, #tabmail-container, #mail3PaneTab,
+#folderPane, #threadPane, #messagePane, #messageHeader, #spacesToolbar,
+#unifiedToolbar, #tabs-toolbar, #toolbar-menubar, #status-bar, #quickFilterBar,
+#accountCentralBox, #navigation-toolbox, #compose-toolbox, findbar,
+unified-toolbar, #messengerBody, #titlebar {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+/* Rounded, soft shapes (niri rounds the window at 20px). */
+#folderTree li > .container { border-radius: 8px !important; }
+.tab-background { border-radius: 8px 8px 0 0 !important; border: none !important; }
+.tab-background[selected] { background-color: var(--px-tint-2) !important; }
+.tab-line { background-color: var(--px-primary) !important; }
+tr[is="thread-card"] > td > .card-container {
+  border-radius: 10px !important;
+  border-color: transparent !important;
+}
+tr[is="thread-card"]:hover > td > .card-container { background-color: var(--px-tint-1) !important; }
+#threadTree [is="thread-card"] { border-color: transparent !important; }
+.folder-count, .folder-total { background-color: rgba(135, 171, 192, 0.18) !important; color: var(--px-fg-bright) !important; }
+button, .button, menulist, input, textarea, html|input, html|textarea, html|select { border-radius: 8px; }

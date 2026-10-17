@@ -1,0 +1,58 @@
+From 32ca220f74fec5f92ac831f867aee74d0215c0ed Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Fl=C3=A1vio=20Barroso=20Neves?=
+Date: Sun, 5 Jul 2026 16:51:26 -0300
+Subject: [PATCH] platform/x86: asus-armoury: add support for HN7306EA and
+ HN7306EAC
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Add TDP data for laptop models HN7306EA and HN7306EAC.
+
+Signed-off-by: Flávio Barroso Neves
+Reviewed-by: Ilpo Järvinen
+Signed-off-by: Ilpo Järvinen
+---
+ drivers/platform/x86/asus-armoury.h | 29 +++++++++++++++++++++++++++++
+ 1 file changed, 29 insertions(+)
+
+diff --git a/drivers/platform/x86/asus-armoury.h b/drivers/platform/x86/asus-armoury.h
+index 53f9e234981609..09a3eaf2e9f96b 100644
+--- a/drivers/platform/x86/asus-armoury.h
++++ b/drivers/platform/x86/asus-armoury.h
+@@ -2383,6 +2383,35 @@ static const struct dmi_system_id power_limits[] = {
+ 			},
+ 		},
+ 	},
++	{
++		.matches = {
++			DMI_MATCH(DMI_BOARD_NAME, "HN7306EA"),
++		},
++		.driver_data = &(struct power_data) {
++			.ac_data = &(struct power_limits) {
++				.ppt_pl1_spl_min = 35,
++				.ppt_pl1_spl_def = 60,
++				.ppt_pl1_spl_max = 85,
++				.ppt_pl2_sppt_min = 40,
++				.ppt_pl2_sppt_def = 70,
++				.ppt_pl2_sppt_max = 95,
++				.ppt_pl3_fppt_min = 50,
++				.ppt_pl3_fppt_def = 85,
++				.ppt_pl3_fppt_max = 115,
++			},
++			.dc_data = &(struct power_limits) {
++				.ppt_pl1_spl_min = 35,
++				.ppt_pl1_spl_def = 45,
++				.ppt_pl1_spl_max = 60,
++				.ppt_pl2_sppt_min = 40,
++				.ppt_pl2_sppt_def = 55,
++				.ppt_pl2_sppt_max = 70,
++				.ppt_pl3_fppt_min = 50,
++				.ppt_pl3_fppt_def = 65,
++				.ppt_pl3_fppt_max = 85,
++			},
++		},
++	},
+ 	{
+ 		.matches = {
+ 			DMI_MATCH(DMI_BOARD_NAME, "RC71"),

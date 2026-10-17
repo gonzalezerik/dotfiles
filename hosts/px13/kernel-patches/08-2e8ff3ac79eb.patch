@@ -1,0 +1,14 @@
+Backport of upstream 2e8ff3ac79eb ("drm/amd/display: Shorten hdmi_frl_status_polling_workqueue")
+to 7.2.6 - upstream's context lines differ, the change itself is identical.
+
+--- a/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c	2026-09-27 15:45:59.394652734 -0700
++++ b/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c	2026-09-27 15:46:01.133657409 -0700
+@@ -2324,7 +2324,7 @@
+ 	}
+ 	if (adev->dm.dc->caps.max_links > 0) {
+ 		adev->dm.hdmi_frl_status_polling_wq =
+-			create_singlethread_workqueue("hdmi_frl_status_polling_workqueue");
++			create_singlethread_workqueue("hdmi_frl_status_polling_wq");
+ 		if (!adev->dm.hdmi_frl_status_polling_wq)
+ 			drm_err(adev_to_drm(adev), "failed to initialize hdmi_frl_status_polling_workqueue\n");
+ 		adev->dm.hdmi_frl_status_polling_delay_ms = 200;

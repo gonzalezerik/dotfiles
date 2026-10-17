@@ -1,0 +1,46 @@
+# macOS-style Control Center for Noctalia: one sheet with connectivity,
+# toggles, brightness/volume sliders and Now Playing, dropped from its bar
+# button. Colors are palette roles only, so it follows the px13-blue theme.
+# Installed by ../control-center.nix (local plugin dir, Nix-managed).
+
+id          = "erikg/control"
+name        = "Control Center"
+version     = "1.0.0"
+plugin_api  = 24
+author      = "erikg"
+icon        = "adjustments-horizontal"
+description = "macOS-style control center: Wi-Fi, Bluetooth, VPN, focus, night light, display, sound and now playing on one sheet."
+
+# Bar pills (lib/pill.luau): muted-blue outline only on hover / while open.
+[[widget]]
+id    = "button"
+entry = "button.luau"
+
+[[widget]]
+id    = "battery"
+entry = "battery.luau"
+
+[[widget]]
+id    = "wifi"
+entry = "wifi.luau"
+
+[[widget]]
+id    = "search"
+entry = "search.luau"
+
+[[widget]]
+id    = "clock"
+entry = "clock.luau"
+
+[[widget]]
+id    = "hardware"
+entry = "hardware.luau"
+
+[[panel]]
+id              = "panel"
+entry           = "panel.luau"
+width           = 400
+height          = 590
+placement       = "attached"
+position        = "auto"
+open_near_click = true
